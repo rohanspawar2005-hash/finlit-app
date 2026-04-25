@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinLit — Mobile App</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #F7F7F5;
+  --white: #FFFFFF;
+  --black: #111111;
+  --accent: #1A1A2E;
+  --green: #2D6A4F;
+  --green-light: #EAF4EE;
+  --red: #C0392B;
+  --red-light: #FDECEA;
+  --amber: #B7791F;
+  --amber-light: #FEF3DC;
+  --gray: #8A8A8A;
+  --gray-light: #EFEFED;
+  --border: #E8E8E6;
+  --text: #111111;
+  --muted: #8A8A8A;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: #E0DDD8;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+/* PHONE FRAME */
+.phone {
+  width: 390px;
+  min-height: 844px;
+  background: var(--bg);
+  border-radius: 52px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* STATUS BAR */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--black);
+  flex-shrink: 0;
+}
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons svg { width: 16px; height: 16px; }
+
+/* SCREENS */
+.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+.scroll-area { flex: 1; overflow-y: auto; padding-bottom: 20px; scrollbar-width: none; }
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  display: flex;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 10px 0 24px;
+  flex-shrink: 0;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 6px 0;
+}
+.nav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.02em; }
+.nav-tab.active .nav-label { color: var(--black); }
+.nav-tab.active .nav-dot {
+  width: 4px; height: 4px; background: var(--black); border-radius: 50%; margin-top: 2px;
+}
+.nav-dot { width: 4px; height: 4px; margin-top: 2px; }
+
+/* SHARED */
+.page-pad { padding: 0 24px; }
+.section-title {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+}
+.row { display: flex; justify-content: space-between; align-items: center; }
+.gap-sm { height: 12px; }
+.gap { height: 24px; }
+
+/* HEADER */
+.header { padding: 16px 24px 20px; }
+.header-sub { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.header-title { font-size: 22px; font-weight: 800; color: var(--black); letter-spacing: -0.5px; }
+
+/* CARD */
+.card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.card-flat {
+  background: var(--gray-light);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* BALANCE CARD */
+.balance-card {
+  background: var(--black);
+  border-radius: 24px;
+  padding: 24px;
+  margin: 0 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.balance-card::before {
+  content: '';
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  top: -60px; right: -40px;
+}
+.balance-card::after {
+  content: '';
+  position: absolute;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  bottom: -30px; left: 20px;
+}
+.balance-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+.balance-amount { font-size: 38px; font-weight: 800; letter-spacing: -1.5px; color: white; line-height: 1; margin-bottom: 20px; }
+.balance-row { display: flex; gap: 20px; }
+.balance-item { flex: 1; }
+.balance-item-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+.balance-item-val { font-size: 15px; font-weight: 700; color: white; }
+.balance-item-val.up { color: #5EE89A; }
+.balance-item-val.down { color: #FF7B7B; }
+
+/* QUICK ACTIONS */
+.quick-actions { display: flex; gap: 10px; padding: 0 24px; margin-top: 20px; }
+.quick-btn {
+  flex: 1; background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px 8px; text-align: center; cursor: pointer;
+  transition: all 0.15s;
+}
+.quick-btn:active { background: var(--gray-light); transform: scale(0.97); }
+.quick-btn-icon { font-size: 20px; margin-bottom: 5px; }
+.quick-btn-label { font-size: 10px; font-weight: 700; color: var(--black); letter-spacing: 0.03em; }
+
+/* HEALTH SCORE */
+.health-row { display: flex; gap: 10px; padding: 0 24px; }
+.health-card { flex: 1; background: var(--white); border-radius: 20px; padding: 18px 16px; border: 1px solid var(--border); }
+.health-score { font-size: 32px; font-weight: 900; color: var(--black); letter-spacing: -1px; line-height: 1; }
+.health-score-sub { font-size: 10px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.score-bar { height: 4px; background: var(--gray-light); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 4px; background: var(--black); }
+
+/* PROGRESS BAR */
+.prog { height: 5px; background: var(--gray-light); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; }
+.prog-fill.green { background: var(--green); }
+.prog-fill.red { background: var(--red); }
+.prog-fill.amber { background: var(--amber); }
+.prog-fill.black { background: var(--black); }
+
+/* TAG */
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+}
+.tag-green { background: var(--green-light); color: var(--green); }
+.tag-red { background: var(--red-light); color: var(--red); }
+.tag-amber { background: var(--amber-light); color: var(--amber); }
+.tag-gray { background: var(--gray-light); color: var(--muted); }
+.tag-black { background: var(--black); color: white; }
+
+/* TRANSACTION LIST */
+.tx { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.tx:last-child { border-bottom: none; }
+.tx-ico { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.tx-ico.f { background: #FFF0EB; }
+.tx-ico.t { background: #EBF5FF; }
+.tx-ico.e { background: #F0EBFF; }
+.tx-ico.s { background: #FFFAEB; }
+.tx-ico.i { background: var(--green-light); }
+.tx-name { font-size: 14px; font-weight: 600; color: var(--black); }
+.tx-cat { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+.tx-tip { font-size: 10px; font-weight: 600; color: var(--green); margin-top: 4px; }
+.tx-amt { font-size: 15px; font-weight: 700; margin-left: auto; flex-shrink: 0; }
+.tx-amt.out { color: var(--black); }
+.tx-amt.in { color: var(--green); }
+
+/* STREAK */
+.streak-row { display: flex; gap: 6px; }
+.streak-dot {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+}
+.streak-dot.done { background: var(--black); color: white; }
+.streak-dot.today { background: var(--black); color: white; outline: 3px solid rgba(17,17,17,0.2); outline-offset: 2px; }
+.streak-dot.skip { background: var(--gray-light); color: var(--muted); }
+.streak-dot.future { background: transparent; border: 1.5px dashed var(--border); color: var(--border); }
+
+/* CATEGORY ROW */
+.cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.cat-row:last-child { margin-bottom: 0; }
+.cat-icon { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.cat-name { font-size: 13px; font-weight: 600; color: var(--black); }
+.cat-amt { font-size: 12px; color: var(--muted); font-weight: 500; }
+.cat-bar-wrap { flex: 1; }
+
+/* LEARN CARD */
+.lesson {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 10px;
+  display: flex; gap: 14px; align-items: center;
+  cursor: pointer;
+}
+.lesson-ico { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.lesson-title { font-size: 13px; font-weight: 700; color: var(--black); margin-bottom: 3px; }
+.lesson-meta { font-size: 11px; color: var(--muted); font-weight: 500; }
+.lesson-xp { font-size: 10px; font-weight: 700; color: var(--amber); margin-top: 5px; }
+.lesson-arrow { font-size: 18px; color: var(--muted); margin-left: auto; flex-shrink: 0; }
+.lesson.locked { opacity: 0.45; }
+.lesson.active-lesson { border-color: var(--black); }
+
+/* BADGE */
+.badge-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.badge-item {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px 8px; text-align: center;
+  cursor: pointer;
+}
+.badge-item.earned { border-color: var(--black); }
+.badge-item.locked-b { opacity: 0.4; }
+.b-icon { font-size: 24px; margin-bottom: 5px; }
+.b-name { font-size: 9px; font-weight: 700; color: var(--black); letter-spacing: 0.03em; line-height: 1.3; }
+
+/* SIM */
+.sim-field { margin-bottom: 16px; }
+.sim-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+.sim-input {
+  width: 100%; background: var(--gray-light); border: 1.5px solid transparent;
+  border-radius: 14px; padding: 12px 16px;
+  font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 600; color: var(--black);
+  outline: none; transition: border-color 0.2s;
+}
+.sim-input:focus { border-color: var(--black); background: var(--white); }
+.range-wrap { position: relative; }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 3px;
+  border-radius: 3px; background: var(--gray-light); outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--black); cursor: pointer;
+  border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.range-labels { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+.sim-result {
+  background: var(--black); border-radius: 20px; padding: 20px; text-align: center; margin-top: 4px;
+}
+.sim-result-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.sim-result-val { font-size: 32px; font-weight: 900; color: white; letter-spacing: -1px; }
+.sim-result-sub { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+/* GOAL CARD */
+.goal-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 20px; padding: 18px; margin-bottom: 10px;
+}
+.goal-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.goal-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--gray-light); }
+.goal-name { font-size: 14px; font-weight: 700; color: var(--black); }
+.goal-sub { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+.goal-amounts { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.goal-saved { font-size: 18px; font-weight: 800; color: var(--black); }
+.goal-target { font-size: 12px; font-weight: 600; color: var(--muted); }
+
+/* PEER */
+.peer-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.peer-item:last-child { border-bottom: none; }
+.peer-rank { font-size: 13px; font-weight: 800; color: var(--muted); width: 20px; text-align: center; }
+.peer-rank.top { color: var(--black); }
+.peer-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; background: var(--gray-light); flex-shrink: 0; font-weight: 700; font-size: 13px; }
+.peer-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--black); }
+.peer-xp { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+/* NUDGE */
+.nudge {
+  background: var(--green-light); border-radius: 16px; padding: 14px 16px;
+  display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px;
+}
+.nudge-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.nudge-text { font-size: 12px; font-weight: 500; color: var(--green); line-height: 1.5; }
+.nudge-text strong { font-weight: 700; }
+
+.nudge.warn { background: var(--amber-light); }
+.nudge.warn .nudge-text { color: var(--amber); }
+
+/* BNPL GATE */
+.bnpl-gate {
+  background: var(--red-light); border-radius: 16px; padding: 16px;
+  margin-bottom: 16px;
+}
+.bnpl-gate-title { font-size: 12px; font-weight: 800; color: var(--red); letter-spacing: 0.02em; margin-bottom: 4px; }
+.bnpl-gate-text { font-size: 11px; font-weight: 500; color: #8B1A1A; line-height: 1.6; }
+
+/* PILL BUTTON */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 12px 22px; border-radius: 50px; border: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-black { background: var(--black); color: white; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--black); }
+.btn-full { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 11px; }
+
+/* XP BAR */
+.xp-bar-outer { height: 6px; background: var(--gray-light); border-radius: 6px; overflow: hidden; }
+.xp-bar-inner { height: 100%; border-radius: 6px; background: var(--black); width: 68%; animation: xpGrow 1s ease 0.2s both; }
+@keyframes xpGrow { from { width: 0; } }
+
+/* CHALLENGE */
+.challenge-big {
+  background: var(--black); border-radius: 24px; padding: 24px; color: white; margin-bottom: 10px;
+  position: relative; overflow: hidden;
+}
+.challenge-big::after {
+  content: '🏆';
+  position: absolute; right: 20px; bottom: 16px; font-size: 52px; opacity: 0.1;
+}
+
+/* WHAT-IF */
+.whatif-card {
+  background: var(--gray-light); border-radius: 16px; padding: 16px; margin-bottom: 8px;
+}
+.whatif-scenario { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.whatif-val { font-size: 18px; font-weight: 800; color: var(--black); }
+
+/* ANIMATION */
+.screen.active .card,
+.screen.active .balance-card,
+.screen.active .lesson,
+.screen.active .goal-card { animation: fadeUp 0.3s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.screen.active .card:nth-child(2) { animation-delay: 0.04s; }
+.screen.active .card:nth-child(3) { animation-delay: 0.08s; }
+
+/* ONBOARDING */
+.step-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.step-row:last-child { border-bottom: none; }
+.step-check {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0; font-weight: 700;
+}
+.step-check.done { background: var(--black); color: white; }
+.step-check.todo { border: 2px solid var(--border); color: var(--muted); }
+.step-text { font-size: 13px; font-weight: 600; color: var(--black); }
+.step-text.done-t { color: var(--muted); text-decoration: line-through; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         HOME / DASHBOARD             ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen active" id="s-home">
+    <div class="scroll-area">
+
+      <!-- Header -->
+      <div class="header">
+        <div class="header-sub">Good morning 👋</div>
+        <div class="header-title">Rahul Kumar</div>
+      </div>
+
+      <!-- Balance Card -->
+      <div class="balance-card">
+        <div class="balance-label">Total Balance</div>
+        <div class="balance-amount">₹18,450</div>
+        <div class="balance-row">
+          <div class="balance-item">
+            <div class="balance-item-label">Income</div>
+            <div class="balance-item-val up">₹15,000</div>
+          </div>
+          <div class="balance-item">
+            <div class="balance-item-label">Spent</div>
+            <div class="balance-item-val down">₹11,230</div>
+          </div>
+          <div class="balance-item">
+            <div class="balance-item-label">Saved</div>
+            <div class="balance-item-val">₹3,770</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <div class="quick-btn" onclick="showScreen('s-tracker')">
+          <div class="quick-btn-icon">📊</div>
+          <div class="quick-btn-label">Track</div>
+        </div>
+        <div class="quick-btn" onclick="showScreen('s-budget')">
+          <div class="quick-btn-icon">🎯</div>
+          <div class="quick-btn-label">Budget</div>
+        </div>
+        <div class="quick-btn" onclick="showScreen('s-invest')">
+          <div class="quick-btn-icon">📈</div>
+          <div class="quick-btn-label">Invest</div>
+        </div>
+        <div class="quick-btn" onclick="showScreen('s-goals')">
+          <div class="quick-btn-icon">🏁</div>
+          <div class="quick-btn-label">Goals</div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+
+      <!-- Smart Nudges -->
+      <div class="page-pad">
+        <div class="section-title">Smart Insights</div>
+        <div class="nudge">
+          <div class="nudge-icon">💡</div>
+          <div class="nudge-text">You spent <strong>₹800 on food delivery</strong> this week — 60% above your usual. Cooking once saves ₹200.</div>
+        </div>
+        <div class="nudge warn">
+          <div class="nudge-icon">🔥</div>
+          <div class="nudge-text"><strong>7-day streak!</strong> Check-in daily to keep your FinHealth score climbing.</div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+
+      <!-- Health + Level -->
+      <div class="page-pad">
+        <div class="section-title">Your Progress</div>
+      </div>
+      <div class="health-row">
+        <div class="health-card">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Health Score</div>
+          <div class="health-score">70</div>
+          <div class="health-score-sub">Good · Top 35%</div>
+          <div class="score-bar"><div class="score-fill" style="width:70%"></div></div>
+        </div>
+        <div class="health-card" style="margin-left:10px;">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">FinLit Level</div>
+          <div class="health-score">Lv.6</div>
+          <div class="health-score-sub">1,840 / 2,000 XP</div>
+          <div class="xp-bar-outer" style="margin-top:10px;"><div class="xp-bar-inner"></div></div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+
+      <!-- Recent Transactions -->
+      <div class="page-pad">
+        <div class="row">
+          <div class="section-title" style="margin-bottom:0;">Recent</div>
+          <span style="font-size:11px;font-weight:700;color:var(--black);cursor:pointer;" onclick="showScreen('s-tracker')">See all →</span>
+        </div>
+        <div style="height:12px;"></div>
+        <div class="card" style="padding:4px 16px;">
+          <div class="tx">
+            <div class="tx-ico f">🍕</div>
+            <div>
+              <div class="tx-name">Zomato</div>
+              <div class="tx-cat">Food · Today</div>
+              <div class="tx-tip">💡 3 orders this week = ₹1,200</div>
+            </div>
+            <div class="tx-amt out">−₹420</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico i">💰</div>
+            <div>
+              <div class="tx-name">Salary</div>
+              <div class="tx-cat">Income · Feb 24</div>
+            </div>
+            <div class="tx-amt in">+₹15,000</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico e">🎮</div>
+            <div>
+              <div class="tx-name">Netflix</div>
+              <div class="tx-cat">Entertainment · Feb 24</div>
+              <div class="tx-tip">💡 Shared plan saves 75%</div>
+            </div>
+            <div class="tx-amt out">−₹649</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+      <div class="nav-tab active" onclick="showScreen('s-home')">
+        <div class="nav-icon">🏠</div>
+        <div class="nav-label">Home</div>
+        <div class="nav-dot"></div>
+      </div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Track</div>
+        <div class="nav-dot"></div>
+      </div>
+      <div class="nav-tab" onclick="showScreen('s-learn')">
+        <div class="nav-icon">🎓</div>
+        <div class="nav-label">Learn</div>
+        <div class="nav-dot"></div>
+      </div>
+      <div class="nav-tab" onclick="showScreen('s-goals')">
+        <div class="nav-icon">🏁</div>
+        <div class="nav-label">Goals</div>
+        <div class="nav-dot"></div>
+      </div>
+      <div class="nav-tab" onclick="showScreen('s-peers')">
+        <div class="nav-icon">👥</div>
+        <div class="nav-label">Social</div>
+        <div class="nav-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║           EXPENSE TRACKER            ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-tracker">
+    <div class="scroll-area">
+
+      <div class="header">
+        <div class="header-sub">February 2025</div>
+        <div class="header-title">Expenses</div>
+      </div>
+
+      <!-- Summary Row -->
+      <div class="page-pad">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+          <div class="card" style="padding:16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Total Spent</div>
+            <div style="font-size:22px;font-weight:800;color:var(--black);letter-spacing:-0.5px;">₹11,230</div>
+            <div class="tag tag-amber" style="margin-top:8px;">↑ 8% vs Jan</div>
+          </div>
+          <div class="card" style="padding:16px;">
+            <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Daily Avg</div>
+            <div style="font-size:22px;font-weight:800;color:var(--black);letter-spacing:-0.5px;">₹374</div>
+            <div class="tag tag-green" style="margin-top:8px;">Under limit</div>
+          </div>
+        </div>
+
+        <!-- CATEGORY BREAKDOWN -->
+        <div class="section-title">By Category</div>
+        <div class="card" style="padding:16px 16px 4px;">
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#FFF0EB;">🍔</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;">
+                <div class="cat-name">Food & Dining</div>
+                <div class="cat-amt" style="color:var(--red);font-weight:700;">₹3,200 <span style="font-size:10px;">Over!</span></div>
+              </div>
+              <div class="prog"><div class="prog-fill red" style="width:100%"></div></div>
+            </div>
+          </div>
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#F0EBFF;">🎮</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;">
+                <div class="cat-name">Entertainment</div>
+                <div class="cat-amt">₹2,400</div>
+              </div>
+              <div class="prog"><div class="prog-fill amber" style="width:96%"></div></div>
+            </div>
+          </div>
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#EBF5FF;">🚌</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;">
+                <div class="cat-name">Transport</div>
+                <div class="cat-amt">₹1,800</div>
+              </div>
+              <div class="prog"><div class="prog-fill black" style="width:90%"></div></div>
+            </div>
+          </div>
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#FFFAEB;">🛒</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;">
+                <div class="cat-name">Shopping</div>
+                <div class="cat-amt">₹1,200</div>
+              </div>
+              <div class="prog"><div class="prog-fill green" style="width:48%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gap"></div>
+
+        <!-- ALL TRANSACTIONS -->
+        <div class="row" style="margin-bottom:12px;">
+          <div class="section-title" style="margin-bottom:0;">All Transactions</div>
+          <button class="btn btn-outline btn-sm">+ Add</button>
+        </div>
+        <div class="card" style="padding:4px 16px;">
+          <div class="tx">
+            <div class="tx-ico f">🍕</div>
+            <div><div class="tx-name">Zomato — Biryani</div><div class="tx-cat">Food · Today 1:30 PM</div><div class="tx-tip">💡 3 orders this week = ₹1,200</div></div>
+            <div class="tx-amt out">−₹420</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico e">🎮</div>
+            <div><div class="tx-name">BGMI Coins</div><div class="tx-cat">Gaming · Today 11 AM</div><div class="tx-tip">💡 In-game spending has no real value</div></div>
+            <div class="tx-amt out">−₹320</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico i">💰</div>
+            <div><div class="tx-name">Salary Credit</div><div class="tx-cat">Income · Feb 24</div></div>
+            <div class="tx-amt in">+₹15,000</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico s">☕</div>
+            <div><div class="tx-name">Starbucks</div><div class="tx-cat">Food · Feb 24</div><div class="tx-tip">💡 ₹450 daily = ₹13,500/month</div></div>
+            <div class="tx-amt out">−₹450</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico t">🚌</div>
+            <div><div class="tx-name">Metro Monthly Pass</div><div class="tx-cat">Transport · Feb 23</div></div>
+            <div class="tx-amt out">−₹700</div>
+          </div>
+          <div class="tx">
+            <div class="tx-ico s">🛒</div>
+            <div><div class="tx-name">Amazon</div><div class="tx-cat">Shopping · Feb 22</div><div class="tx-tip">💡 Wait 24h before impulse buys</div></div>
+            <div class="tx-amt out">−₹1,299</div>
+          </div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab active" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║         BUDGET PLANNER               ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-budget">
+    <div class="scroll-area">
+      <div class="header">
+        <div class="header-sub">February 2025</div>
+        <div class="header-title">Budget</div>
+      </div>
+
+      <div class="page-pad">
+        <!-- Big progress -->
+        <div class="balance-card" style="margin:0 0 20px;">
+          <div class="balance-label">Monthly Budget</div>
+          <div class="balance-amount">₹15,000</div>
+          <div style="height:6px;background:rgba(255,255,255,0.12);border-radius:6px;overflow:hidden;margin-bottom:14px;">
+            <div style="width:75%;height:100%;background:white;border-radius:6px;"></div>
+          </div>
+          <div class="balance-row">
+            <div class="balance-item"><div class="balance-item-label">Spent</div><div class="balance-item-val down">₹11,230</div></div>
+            <div class="balance-item"><div class="balance-item-label">Left</div><div class="balance-item-val up">₹3,770</div></div>
+            <div class="balance-item"><div class="balance-item-label">Used</div><div class="balance-item-val">75%</div></div>
+          </div>
+        </div>
+
+        <!-- 50/30/20 -->
+        <div class="section-title">50 / 30 / 20 Rule</div>
+        <div class="card" style="margin-bottom:20px;">
+          <div style="margin-bottom:14px;">
+            <div class="row" style="margin-bottom:6px;">
+              <div style="font-size:13px;font-weight:600;">🏠 Needs (50%)</div>
+              <div style="font-size:12px;"><span style="font-weight:700;color:var(--green);">₹6,280</span> <span style="color:var(--muted);">/ ₹7,500</span></div>
+            </div>
+            <div class="prog"><div class="prog-fill green" style="width:84%"></div></div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <div class="row" style="margin-bottom:6px;">
+              <div style="font-size:13px;font-weight:600;">🎯 Wants (30%)</div>
+              <div style="font-size:12px;"><span style="font-weight:700;color:var(--red);">₹5,820</span> <span style="color:var(--muted);">/ ₹4,500</span></div>
+            </div>
+            <div class="prog"><div class="prog-fill red" style="width:100%"></div></div>
+            <div class="tag tag-red" style="margin-top:6px;">Over by ₹1,320</div>
+          </div>
+          <div>
+            <div class="row" style="margin-bottom:6px;">
+              <div style="font-size:13px;font-weight:600;">💰 Savings (20%)</div>
+              <div style="font-size:12px;"><span style="font-weight:700;">₹2,040</span> <span style="color:var(--muted);">/ ₹3,000</span></div>
+            </div>
+            <div class="prog"><div class="prog-fill black" style="width:68%"></div></div>
+          </div>
+          <div style="background:var(--amber-light);border-radius:12px;padding:12px;margin-top:14px;">
+            <div style="font-size:11px;font-weight:600;color:var(--amber);line-height:1.6;">Reduce Wants by ₹1,320 to hit the 30% target. Swap 1 food delivery + 1 entertainment expense.</div>
+          </div>
+        </div>
+
+        <!-- Category limits -->
+        <div class="section-title">Category Limits</div>
+        <div class="card" style="padding:16px 16px 4px;margin-bottom:20px;">
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#FFF0EB;">🍔</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;"><div class="cat-name">Food</div><div style="font-size:11px;font-weight:700;color:var(--red);">₹3,200 / ₹3,000 ⚠</div></div>
+              <div class="prog"><div class="prog-fill red" style="width:100%"></div></div>
+            </div>
+          </div>
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#F0EBFF;">🎮</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;"><div class="cat-name">Entertainment</div><div style="font-size:11px;font-weight:600;color:var(--muted);">₹2,400 / ₹2,500</div></div>
+              <div class="prog"><div class="prog-fill amber" style="width:96%"></div></div>
+            </div>
+          </div>
+          <div class="cat-row">
+            <div class="cat-icon" style="background:#FFFAEB;">🛒</div>
+            <div class="cat-bar-wrap">
+              <div class="row" style="margin-bottom:5px;"><div class="cat-name">Shopping</div><div style="font-size:11px;font-weight:600;color:var(--muted);">₹1,200 / ₹2,500</div></div>
+              <div class="prog"><div class="prog-fill green" style="width:48%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Fund -->
+        <div class="section-title">Emergency Fund</div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+            <div>
+              <div style="font-size:22px;font-weight:800;color:var(--black);">₹8,400</div>
+              <div style="font-size:11px;color:var(--muted);font-weight:500;">of ₹33,690 (3-month target)</div>
+            </div>
+            <div class="tag tag-gray">25%</div>
+          </div>
+          <div class="prog" style="height:6px;"><div class="prog-fill black" style="width:25%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;font-weight:500;line-height:1.6;">Save ₹1,200/month → reach goal in <strong style="color:var(--black);">21 months</strong></div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab active" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║            LEARN & EARN              ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-learn">
+    <div class="scroll-area">
+      <div class="header">
+        <div class="header-sub">Level 6 · 1,840 XP</div>
+        <div class="header-title">Learn & Earn</div>
+      </div>
+
+      <div class="page-pad">
+        <!-- Level Progress -->
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:52px;height:52px;border-radius:16px;background:var(--black);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:900;flex-shrink:0;">6</div>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Finance Explorer</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">160 XP to Level 7</div>
+              <div class="xp-bar-outer"><div class="xp-bar-inner"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">This Week's Streak</div>
+            <div class="streak-row">
+              <div class="streak-dot done">M</div>
+              <div class="streak-dot done">T</div>
+              <div class="streak-dot done">W</div>
+              <div class="streak-dot done">T</div>
+              <div class="streak-dot done">F</div>
+              <div class="streak-dot done">S</div>
+              <div class="streak-dot today">S</div>
+              <div class="streak-dot future">M</div>
+              <div class="streak-dot future">T</div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:500;">🔥 <strong style="color:var(--black);">7-day streak!</strong> Bonus badge tomorrow.</div>
+          </div>
+        </div>
+
+        <!-- BNPL Gate -->
+        <div class="bnpl-gate">
+          <div class="bnpl-gate-title">⚠ BNPL Locked — Complete Credit Module First</div>
+          <div class="bnpl-gate-text">40% of BNPL users aged 18–24 miss their first payment. Learn how credit works before you use it — it could save you thousands in interest.</div>
+        </div>
+
+        <!-- Active lesson -->
+        <div style="background:var(--black);border-radius:20px;padding:20px;margin-bottom:16px;color:white;">
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Continue Learning</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:4px;">How Compound Interest Works</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:14px;">Lesson 3 of 5 · ~8 min</div>
+          <div style="height:4px;background:rgba(255,255,255,0.12);border-radius:4px;overflow:hidden;margin-bottom:14px;">
+            <div style="width:60%;height:100%;background:white;border-radius:4px;"></div>
+          </div>
+          <button class="btn btn-sm" style="background:white;color:var(--black);font-weight:700;">Resume →</button>
+        </div>
+
+        <!-- Modules -->
+        <div class="section-title">All Modules</div>
+
+        <div class="lesson active-lesson">
+          <div class="lesson-ico" style="background:var(--green-light);">💵</div>
+          <div style="flex:1;">
+            <div class="lesson-title">What is Budgeting?</div>
+            <div class="lesson-meta">Module 1 · Fundamentals</div>
+            <div class="lesson-xp">+120 XP <span class="tag tag-green" style="font-size:9px;padding:2px 7px;margin-left:4px;">Completed</span></div>
+          </div>
+          <div class="lesson-arrow">✓</div>
+        </div>
+
+        <div class="lesson active-lesson">
+          <div class="lesson-ico" style="background:var(--amber-light);">📈</div>
+          <div style="flex:1;">
+            <div class="lesson-title">Power of Saving Early</div>
+            <div class="lesson-meta">Module 2 · Savings</div>
+            <div class="lesson-xp">+150 XP <span class="tag tag-green" style="font-size:9px;padding:2px 7px;margin-left:4px;">Completed</span></div>
+          </div>
+          <div class="lesson-arrow">✓</div>
+        </div>
+
+        <div class="lesson" style="border-color:var(--black);">
+          <div class="lesson-ico" style="background:var(--gray-light);">🏦</div>
+          <div style="flex:1;">
+            <div class="lesson-title">Compound Interest</div>
+            <div class="lesson-meta">Module 3 · In Progress</div>
+            <div class="lesson-xp">+180 XP <span class="tag tag-amber" style="font-size:9px;padding:2px 7px;margin-left:4px;">60%</span></div>
+          </div>
+          <div class="lesson-arrow">▶</div>
+        </div>
+
+        <div class="lesson locked">
+          <div class="lesson-ico" style="background:var(--red-light);">💳</div>
+          <div style="flex:1;">
+            <div class="lesson-title">Understanding Credit Scores</div>
+            <div class="lesson-meta">Module 4 · Locked</div>
+            <div class="lesson-xp">+200 XP</div>
+          </div>
+          <div class="lesson-arrow">🔒</div>
+        </div>
+
+        <div class="lesson locked">
+          <div class="lesson-ico" style="background:var(--green-light);">📊</div>
+          <div style="flex:1;">
+            <div class="lesson-title">SIPs & Mutual Funds</div>
+            <div class="lesson-meta">Module 5 · Locked</div>
+            <div class="lesson-xp">+250 XP</div>
+          </div>
+          <div class="lesson-arrow">🔒</div>
+        </div>
+
+        <div class="gap"></div>
+
+        <!-- Badges -->
+        <div class="section-title">Badges</div>
+        <div class="badge-row">
+          <div class="badge-item earned"><div class="b-icon">🥇</div><div class="b-name">First Budget</div></div>
+          <div class="badge-item earned"><div class="b-icon">🔥</div><div class="b-name">7-Day Streak</div></div>
+          <div class="badge-item earned"><div class="b-icon">📚</div><div class="b-name">Bookworm</div></div>
+          <div class="badge-item earned"><div class="b-icon">💡</div><div class="b-name">Insight Pro</div></div>
+          <div class="badge-item locked-b"><div class="b-icon">🏦</div><div class="b-name">Saver Elite</div></div>
+          <div class="badge-item locked-b"><div class="b-icon">📈</div><div class="b-name">Investor</div></div>
+          <div class="badge-item locked-b"><div class="b-icon">💎</div><div class="b-name">Diamond</div></div>
+          <div class="badge-item locked-b"><div class="b-icon">🧙</div><div class="b-name">FinWizard</div></div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab active" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║        INVESTMENT SIMULATOR          ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-invest">
+    <div class="scroll-area">
+      <div class="header">
+        <div class="header-sub">Explore risk-free</div>
+        <div class="header-title">Invest Simulator</div>
+      </div>
+
+      <div class="page-pad">
+        <!-- SIP Calc -->
+        <div class="section-title">SIP Calculator</div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="sim-field">
+            <div class="sim-label">Monthly Amount (₹)</div>
+            <input class="sim-input" type="number" id="sip-amt" value="500" oninput="calcSIP()">
+          </div>
+          <div class="sim-field">
+            <div class="sim-label">Annual Return: <span id="ret-lbl" style="color:var(--black);">12%</span></div>
+            <input type="range" min="6" max="20" value="12" id="sip-ret" oninput="calcSIP()">
+            <div class="range-labels"><span>6% (FD)</span><span>12% (MF)</span><span>20% (Equity)</span></div>
+          </div>
+          <div class="sim-field" style="margin-bottom:0;">
+            <div class="sim-label">Duration: <span id="yr-lbl" style="color:var(--black);">10 years</span></div>
+            <input type="range" min="1" max="30" value="10" id="sip-yrs" oninput="calcSIP()">
+            <div class="range-labels"><span>1 yr</span><span>15 yrs</span><span>30 yrs</span></div>
+          </div>
+          <div class="sim-result" style="margin-top:16px;">
+            <div class="sim-result-label">Estimated Value</div>
+            <div class="sim-result-val" id="sip-out">₹1,16,170</div>
+            <div class="sim-result-sub">Invested ₹60,000 · Gains <span id="sip-gain">₹56,170</span></div>
+          </div>
+        </div>
+
+        <!-- What-If -->
+        <div class="section-title">What-If Scenarios</div>
+        <div class="whatif-card">
+          <div class="whatif-scenario">☕ Skip 1 coffee/day → Save ₹6,000/year</div>
+          <div class="whatif-val">₹4,80,000 in 10 years</div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;">at 12% annual return</div>
+        </div>
+        <div class="whatif-card">
+          <div class="whatif-scenario">🍕 Cut 2 food deliveries/week → Save ₹7,200/year</div>
+          <div class="whatif-val">₹14,40,000 in 10 years</div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;">at 12% annual return</div>
+        </div>
+        <div class="whatif-card">
+          <div class="whatif-scenario">🎓 Start SIP at 18 vs 28 (₹1,000/mo)</div>
+          <div class="whatif-val">₹35L more by retirement</div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);margin-top:2px;">10-year head start makes a massive difference</div>
+        </div>
+
+        <div class="gap"></div>
+        <div class="section-title">Where to Start</div>
+        <div class="card" style="padding:12px 16px 4px;">
+          <div class="tx" style="padding:12px 0;">
+            <div style="width:38px;height:38px;border-radius:12px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🏦</div>
+            <div><div class="tx-name">Fixed Deposit</div><div class="tx-cat">Low risk · 6–7% return</div></div>
+            <div class="tag tag-green" style="margin-left:auto;">Safe</div>
+          </div>
+          <div class="tx" style="padding:12px 0;">
+            <div style="width:38px;height:38px;border-radius:12px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📊</div>
+            <div><div class="tx-name">Debt Mutual Funds</div><div class="tx-cat">Low-medium · 7–9%</div></div>
+            <div class="tag tag-amber" style="margin-left:auto;">Good</div>
+          </div>
+          <div class="tx" style="padding:12px 0;border-bottom:none;">
+            <div style="width:38px;height:38px;border-radius:12px;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">⚡</div>
+            <div><div class="tx-name">Index Fund SIP</div><div class="tx-cat">Medium risk · 12–15%</div></div>
+            <div class="tag tag-black" style="margin-left:auto;">Best</div>
+          </div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║           SAVINGS GOALS              ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-goals">
+    <div class="scroll-area">
+      <div class="header">
+        <div class="header-sub">3 active goals</div>
+        <div class="header-title">Savings Goals</div>
+      </div>
+
+      <div class="page-pad">
+        <div class="goal-card">
+          <div class="goal-head">
+            <div class="goal-icon">💻</div>
+            <div>
+              <div class="goal-name">MacBook Pro</div>
+              <div class="goal-sub">18 months remaining</div>
+            </div>
+            <div class="tag tag-gray" style="margin-left:auto;">35%</div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-saved">₹42,000</div>
+            <div class="goal-target">of ₹1,20,000</div>
+          </div>
+          <div class="prog" style="height:6px;"><div class="prog-fill black" style="width:35%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:500;">Save ₹4,333/month to reach goal on time</div>
+        </div>
+
+        <div class="goal-card">
+          <div class="goal-head">
+            <div class="goal-icon">✈️</div>
+            <div>
+              <div class="goal-name">Goa Trip</div>
+              <div class="goal-sub">3 months left</div>
+            </div>
+            <div class="tag tag-green" style="margin-left:auto;">On track</div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-saved">₹8,500</div>
+            <div class="goal-target">of ₹15,000</div>
+          </div>
+          <div class="prog" style="height:6px;"><div class="prog-fill green" style="width:57%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:500;">₹2,167/month needed — you're on track!</div>
+        </div>
+
+        <div class="goal-card">
+          <div class="goal-head">
+            <div class="goal-icon">🛡️</div>
+            <div>
+              <div class="goal-name">Emergency Fund</div>
+              <div class="goal-sub">No deadline set</div>
+            </div>
+            <div class="tag tag-amber" style="margin-left:auto;">25%</div>
+          </div>
+          <div class="goal-amounts">
+            <div class="goal-saved">₹8,400</div>
+            <div class="goal-target">of ₹33,690</div>
+          </div>
+          <div class="prog" style="height:6px;"><div class="prog-fill amber" style="width:25%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:500;">Increase monthly contribution to build faster</div>
+        </div>
+
+        <!-- Add Goal -->
+        <div style="border:2px dashed var(--border);border-radius:20px;padding:28px;text-align:center;cursor:pointer;margin-bottom:20px;" onclick="this.style.borderColor='var(--black)'">
+          <div style="font-size:32px;margin-bottom:8px;">＋</div>
+          <div style="font-size:14px;font-weight:700;color:var(--black);margin-bottom:4px;">Add a New Goal</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:500;">Phone, travel, education — anything</div>
+        </div>
+
+        <!-- Split & Save -->
+        <div class="section-title">Split & Save</div>
+        <div class="card">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="font-size:24px;">✂️</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Split bills, save the difference</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6;font-weight:500;">You split ₹3,200 last month. That's <strong style="color:var(--black);">₹1,600</strong> you could have auto-saved. Enable Split & Save to make it happen automatically.</div>
+              <button class="btn btn-black btn-sm" style="margin-top:12px;">Enable</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab active" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- ╔══════════════════════════════════════╗
+       ║           SOCIAL / PEERS             ║
+       ╚══════════════════════════════════════╝ -->
+  <div class="screen" id="s-peers">
+    <div class="scroll-area">
+      <div class="header">
+        <div class="header-sub">Learn with your circle</div>
+        <div class="header-title">Social</div>
+      </div>
+
+      <div class="page-pad">
+        <!-- Active Challenge -->
+        <div class="challenge-big" style="margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">Active Challenge</div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:6px;">No-Spend Weekend 🧊</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:16px;">Don't spend on non-essentials Fri–Sun. 12 friends competing.</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:12px;color:rgba(255,255,255,0.55);">⏱ Ends in 2 days</div>
+            <button class="btn btn-sm" style="background:white;color:var(--black);font-weight:700;">Join</button>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="section-title" style="margin-top:20px;">Monthly Leaderboard</div>
+        <div class="card" style="padding:4px 16px;">
+          <div class="peer-item">
+            <div class="peer-rank top">1</div>
+            <div class="peer-av">👸</div>
+            <div class="peer-name">Priya M.</div>
+            <div class="peer-xp">3,200 XP</div>
+          </div>
+          <div class="peer-item">
+            <div class="peer-rank top">2</div>
+            <div class="peer-av">🧑</div>
+            <div class="peer-name">Arjun K.</div>
+            <div class="peer-xp">2,900 XP</div>
+          </div>
+          <div class="peer-item">
+            <div class="peer-rank top">3</div>
+            <div class="peer-av">👦</div>
+            <div class="peer-name">Sneha R.</div>
+            <div class="peer-xp">2,450 XP</div>
+          </div>
+          <div class="peer-item" style="background:var(--gray-light);border-radius:12px;padding:12px;border-bottom:none;margin:4px -4px;">
+            <div class="peer-rank top">4</div>
+            <div class="peer-av" style="background:var(--black);color:white;font-weight:800;">RK</div>
+            <div class="peer-name" style="font-weight:700;">You</div>
+            <div class="peer-xp">1,840 XP</div>
+          </div>
+          <div class="peer-item">
+            <div class="peer-rank">5</div>
+            <div class="peer-av">👩</div>
+            <div class="peer-name">Kavya S.</div>
+            <div class="peer-xp">1,620 XP</div>
+          </div>
+        </div>
+
+        <div class="gap"></div>
+        <div class="section-title">Start a Challenge</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="card card-flat" style="background:var(--white);text-align:center;padding:20px 12px;">
+            <div style="font-size:28px;margin-bottom:8px;">🚫</div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">No-Spend Day</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;">Spend ₹0 on extras for a day</div>
+            <button class="btn btn-outline btn-sm btn-full">Create</button>
+          </div>
+          <div class="card card-flat" style="background:var(--white);text-align:center;padding:20px 12px;">
+            <div style="font-size:28px;margin-bottom:8px;">💰</div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Savings Race</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;">Who saves the most % this month</div>
+            <button class="btn btn-outline btn-sm btn-full">Create</button>
+          </div>
+          <div class="card card-flat" style="background:var(--white);text-align:center;padding:20px 12px;">
+            <div style="font-size:28px;margin-bottom:8px;">📚</div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Quiz Battle</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;">Test financial literacy vs friends</div>
+            <button class="btn btn-outline btn-sm btn-full">Create</button>
+          </div>
+          <div class="card card-flat" style="background:var(--white);text-align:center;padding:20px 12px;">
+            <div style="font-size:28px;margin-bottom:8px;">🎯</div>
+            <div style="font-size:12px;font-weight:700;margin-bottom:4px;">Goal Buddy</div>
+            <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:12px;">Save toward a shared goal together</div>
+            <button class="btn btn-outline btn-sm btn-full">Create</button>
+          </div>
+        </div>
+      </div>
+      <div class="gap"></div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-tab" onclick="showScreen('s-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-tracker')"><div class="nav-icon">📊</div><div class="nav-label">Track</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-learn')"><div class="nav-icon">🎓</div><div class="nav-label">Learn</div><div class="nav-dot"></div></div>
+      <div class="nav-tab" onclick="showScreen('s-goals')"><div class="nav-icon">🏁</div><div class="nav-label">Goals</div><div class="nav-dot"></div></div>
+      <div class="nav-tab active" onclick="showScreen('s-peers')"><div class="nav-icon">👥</div><div class="nav-label">Social</div><div class="nav-dot"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function calcSIP() {
+  const P = parseFloat(document.getElementById('sip-amt').value) || 500;
+  const r = parseFloat(document.getElementById('sip-ret').value) / 100 / 12;
+  const n = parseFloat(document.getElementById('sip-yrs').value) * 12;
+  document.getElementById('ret-lbl').textContent = document.getElementById('sip-ret').value + '%';
+  document.getElementById('yr-lbl').textContent = document.getElementById('sip-yrs').value + ' years';
+  const FV = P * (((Math.pow(1 + r, n) - 1) / r) * (1 + r));
+  const invested = P * n;
+  const gains = FV - invested;
+  document.getElementById('sip-out').textContent = '₹' + Math.round(FV).toLocaleString('en-IN');
+  document.getElementById('sip-gain').textContent = '₹' + Math.round(gains).toLocaleString('en-IN');
+}
+</script>
+</body>
+</html>
